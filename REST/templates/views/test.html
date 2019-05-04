@@ -1,0 +1,20 @@
+{% load static %}
+
+<!doctype html>
+
+<html lang="en">
+<head>
+</head>
+
+<body>
+    <script
+        src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
+    <script src="{% static 'REST/test.js' %}"></script>
+
+    <button type="login" onclick="login()">login</button> 
+    <button type="login" onclick="logout()">logout</button>     
+    <button type="add_test_run" onclick="add_run()">add_run</button> 
+</body>
+</html>

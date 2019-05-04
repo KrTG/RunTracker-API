@@ -1,0 +1,436 @@
+Legenda:
+	* - opcjonalne
+	["costam"|"inne_costam"] - do wyboru ten string albo ten
+	
+Link do strony:
+http://pp-projekt.vcagzpgsiy.eu-central-1.elasticbeanstalk.com/
+
+API: <link_do_strony>/sciezka_nizej
+np login: http://pp-projekt.vcagzpgsiy.eu-central-1.elasticbeanstalk.com/api/login
+
+____________________________________________
+/api/version : GET - wersja API
+
+response(200) - przyk³ad:
+{
+    "version": "0.1.0"
+}
+
+____________________________________________
+/api/time : GET - czas serwera
+
+response(200) - przyk³ad:
+{
+    "time": "2018-06-01T13:13:33"
+}
+________________________________________
+/api/register : POST - rejestracja
+	email : string
+	password : string
+	first_name : string
+	last_name : string
+	*weight : int > 0
+	
+response(201) - przyk³ad:
+{
+    "id": 9,
+    "email": "2@email.com",
+    "first_name": "Marek",
+    "last_name": "Marchewa",
+    "weight": 70
+}
+
+Header 'Location' = sciezka(URI) do nowo stworzonego biegu
+	
+____________________________________________
+/api/login : POST - logowanie
+	username: string (adres email u¿ytkownika)
+	password: string
+
+response(200) - { "message": "Logged in" }
+______________________________________________	
+/api/logout : POST - wylogowanie
+
+response(200) - { "message": "Logged out" }
+______________________________________________
+/api/login-status : GET - sprawdzenie czy jesteœmy zalogowani
+
+response(200) - przyk³ad 
+{
+    "logged_in": false
+}
+______________________________________________
+/api/profile : GET - Swoje informacje
+/api/profile/<int: user_id>/ : GET - Informacje o podanym u¿ytkowniku
+
+response(200) - przyk³ad:
+{
+    "id": 3,
+    "email": "c2@gmail.com",
+    "first_name": "Cezary",
+    "last_name": "Nowak",
+    "weight": 70
+}
+____________________________________________
+/api/profile/stats : GET - Swoje informacje i statystyki
+/api/profile/<int: user_id>/stats : GET - Informacje o u¿ytkowniku i jego statystyki
+
+reponse(200) - przyk³ad:
+{
+    "user": {
+        "id": 2,
+        "email": "c@gmail.com",
+        "first_name": "Cezary",
+        "last_name": "Kowalski",
+        "weight": 70
+    },
+    "stats": {
+        "runs": 11,
+        "wins": 4,
+        "total_km": 31
+    }
+}
+
+______________________________________________
+/api/runs : GET - wylistuj biegi, oprócz prywatnych('only_me')
+argumenty:
+	*filter: ["joined"] // na razie tylko 1 filtr, ale moze byc wiecej
+	                    // joined - znaczy tylko te w ktorych bierzesz udzia³						
+	*status: ["finished", "ongoing", "upcoming"] // finished - bieg siê skoñczy³, wszyscy dobiegli
+	// ongoing - bieg siê zacz¹³ ale jeszcze nie skoñczy³
+	// upcoming - bieg siê jeszcze nie zacz¹³
+	*privacy: ["all", "only_me"] // all dla biegów publicznych
+	// i only_me dla biegania samemu
+	
+przyk³ad: /api/runs
+		  /api/runs?filter=joined
+		  /api/runs?filter=joined&status=upcoming&privacy=all
+
+response(200) - przyklad:
+[
+	{
+		"run": {
+			"id": 18,
+			"start": "2018-04-09T11:01",
+			"distance": 10,
+			"privacy": "all",
+			"max_runners": 2,
+	        "finished": false
+		},
+		"creator": {
+            "id": 123,
+            "username": "Zenek",
+            "first_name": "Zenon",
+            "last_name": "Nonez",
+            "weight": 70
+        },
+		"runners": [
+			{
+				"id": 3,
+				"username": "Czarek2",
+				"first_name": "Cezary",
+				"last_name": "Nowak"
+			}
+		],
+		"participating": true
+	},
+	{
+		"run": {
+			"id": 28,
+			"start": "2018-04-09T11:01",
+			"distance": 10,
+			"privacy": "all",
+			"max_runners": 2,
+	        "finished": false
+		},
+		"creator": {
+            "id": 123,
+            "username": "Zenek",
+            "first_name": "Zenon",
+            "last_name": "Nonez",
+            "weight": 70
+        },
+		"runners": [
+			{
+				"id": 3,
+				"username": "Czarek2",
+				"first_name": "Cezary",
+				"last_name": "Nowak"
+			},
+			{
+				"id": 2,
+				"username": "Czarek",
+				"first_name": "Cezary",
+				"last_name": "Kowalski"
+			}
+		],
+		"participating": true
+	}
+]
+
+______________________________________________________
+/api/runs/create : POST - stworzenie biegu i do³¹czenie do niego.
+	distance: int > 0
+	date: yyyy-mm-dd
+	time: hh:mm
+	privacy:  "all"|"only_me"
+	*runners: int > 0 (opcjonalne, default = 1)
+	
+response(201):
+BODY - bieg w JSON, przyklad:
+{
+    "id": 24,
+    "start": "2018-04-09T12:01",
+    "distance": "10",
+    "privacy": "all",
+    "max_runners": "2",
+    "finished": false
+}
+Header 'Location' = sciezka(URI) do nowo stworzonego biegu
+______________________________________________
+/api/runs/<int:run_id>/ : GET - dane o biegu
+
+response(200) przyklad:
+{
+  "run": {
+    "id": 18,
+    "start": "2018-04-09T11:01",
+    "distance": 10,
+    "privacy": "all",
+    "max_runners": 2,
+    "finished": false
+  },
+  "creator": {
+	"id": 123,
+	"username": "Zenek",
+	"first_name": "Zenon",
+	"last_name": "Nonez",
+	"weight": 70
+  },
+  "runners": [
+    {
+	  "id": 18,	
+      "username": "Janek91",
+      "first_name": "Jan",
+      "last_name": "Kowalski"
+    },
+	{
+	  "id": 6,
+      "username": "arczi",
+      "first_name": "Arek",
+      "last_name": "Kowalski"
+    }
+  ],
+  "participating": false
+}
+
+Jeœli privacy == "only_me" to user musi braæ udzia³, ¿eby zobaczyæ
+____________________________________________
+/api/runs/<int:run_id>/join : POST - do³¹czenie do biegu
+
+response(200) - sukces, przyk³ad:
+jak wy¿ej
+
+_______________________________________________
+/api/runs/<int:run_id>/quit : DELETE - od³¹czenie od biegu, dyskwalifikacja
+
+reponse sukces:(204 - usuniêto) b³¹d:(404 - Nie istnieje bieg albo nie jesteœ do³¹czony)
+_________________________________________________
+/api/runs/<int:run_id>/results: GET - Wyniki wyœcigu
+
+response(200) przyk³ad:
+{
+    "run": {
+        "id": 41,
+        "start": "2018-04-18T22:00",
+        "distance": 1,
+        "privacy": "all",
+        "max_runners": 2,
+        "finished": true
+    },
+    "runners": [
+        {
+            "runner": {
+                "id": 3,
+                "username": "Czarek2",
+                "first_name": "Cezary",
+                "last_name": "Nowak",
+                "weight": 70
+            },
+            "stats": {
+                "position": 1,
+                "time": "23:59:59",
+                "avg_tempo": "59:59",
+                "max_tempo": "59:59",
+                "min_tempo": "59:59"
+            }
+        },
+        {
+            "runner": {
+                "id": 2,
+                "username": "Czarek",
+                "first_name": "Cezary",
+                "last_name": "Kowalski",
+                "weight": 70
+            },
+            "stats": {
+                "position": 2,
+                "time": "23:59:59",
+                "avg_tempo": "59:59",
+                "max_tempo": "59:59",
+                "min_tempo": "0:12"
+            }
+        }
+    ]
+}
+
+Jeœli ktoœ jeszcze nie przebieg³ dystansu to 'stats' == null
+
+__________________________________________________________
+/api/runs/<int:run_id>/splits/submit : POST - Update przebiegniêtej odleg³oœci
+	distance:  int > 0
+	
+response(200) - przyk³ad:
+{
+                "distance": 200,
+                "timestamp": "2018-04-18T21:50:34"
+}
+
+____________________________________________________________
+/api/runs/<int:run_id>/splits : GET
+argumenty:
+	later_than=<YYYY-MM-DDTHH:MM:SS> //na przyk³ad 2018-04-18T21:50:41	
+
+response(200) - sukces, przyk³ad:
+[
+    {
+        "user": {
+            "id": 2,
+            "username": "Czarek",
+            "first_name": "Cezary",
+            "last_name": "Kowalski"
+        },
+        "splits": [
+            {
+                "distance": 200,
+                "timestamp": "2018-04-18T21:50:34"
+            },
+            {
+                "distance": 300,
+                "timestamp": "2018-04-18T21:50:41"
+            },
+            {
+                "distance": 400,
+                "timestamp": "2018-04-18T21:50:44"
+            }
+        ]
+    },
+    {
+        "user": {
+            "id": 3,
+            "username": "Czarek2",
+            "first_name": "Cezary",
+            "last_name": "Nowak"
+        },
+        "splits": [
+            {
+                "distance": 100,
+                "timestamp": "2018-04-18T21:49:51"
+            },
+            {
+                "distance": 200,
+                "timestamp": "2018-04-18T21:50:09"
+            },
+            {
+                "distance": 1000,
+                "timestamp": "2018-04-18T21:50:58"
+            }
+        ]
+    }
+]
+
+____________________________________________________________
+/api/runs/<int:run_id>/splits : POST
+
+U¿ywane raczej tylko do biegów prywatnych.
+Na koniec wyœcigu wysy³a siê wszystkie splity od razu
+i to obliczy rezultaty i zakoñczy wyœcig.
+
+argumenty:
+	splits: JSON w stringu - przyk³ad:
+		[
+			{
+				"distance": 200,
+				"timestamp": "2018-07-15T15:52:22"
+			},
+			{
+				"distance": 1000,
+				"timestamp": "2018-07-15T15:52:25"
+			}
+		]
+
+____________________________________________________________
+/api/runs/<int:run_id>/comments : GET
+
+response(200) - sukces:
+[
+    {
+        "text": "2/10",
+        "created": "2018-05-16T14:19"
+    },
+    {
+        "text": "Bardzo ³adnie pobiegniete",
+        "created": "2018-05-16T14:18"
+    },
+    {
+        "text": "Wyrównana walka",
+        "created": "2018-05-16T14:16"
+    }
+]
+____________________________________________
+/api/runs/<int:run_id>/comments/add : POST
+argumenty:
+	comment = string
+
+response(201) - sukces
+{
+    "text": "Tekst przyk³adowy",
+    "created": "2018-05-16T17:22"
+}
+
+____________________________________________
+/api/runs/<int:run_id>/like : POST
+
+reponse(200) - sukces
+{
+    "message": "Run liked"
+}
+
+____________________________________________
+/api/runs/<int:run_id>/watch : POST
+
+reponse(200) - sukces
+
+{
+    "message": "Started watching"
+}
+
+____________________________________________
+/api/runs/<int:run_id>/stop-watching : DELETE
+
+reponse(200) - sukces
+
+{
+    "message": "Stopped watching"
+}
+
+
+____________________________________________
+/api/runs/<int:run_id>/unlike : DELETE
+
+
+reponse(200) - sukces
+{
+    "message": "Run unliked"
+}
+
